@@ -29,3 +29,7 @@ Durante la primera entrega se trabajó en:
 - Comparación entre arquitectura monolítica y microservicios.
 - Identificación preliminar de microservicios.
 - Bitácora de uso de inteligencia artificial.
+
+- ## Estado del proyecto
+
+La primera entrega se encuentra en fase de cierre y validación de la documentación, incluyendo la revisión del repositorio y la evidencia de participación de los integrantes.
