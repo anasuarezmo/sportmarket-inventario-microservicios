@@ -1,0 +1,71 @@
+openapi: 3.0.3
+info:
+  title: API Gateway - SportMarket S.A.S.
+  version: 1.0.0
+  description: 'Contrato API del microservicio API Gateway (framework Express; base de datos: sin base de datos).
+    Generado a partir de las tablas de contratos de la Entrega 2. Se accede únicamente a través del API Gateway.'
+servers:
+- url: http://localhost:8080
+  description: API Gateway (desarrollo)
+paths:
+  /health:
+    get:
+      operationId: get_health
+      summary: Estado del propio Gateway
+      description: Estado del propio Gateway
+      x-roles:
+      - Pública
+      security: []
+      responses:
+        '200':
+          description: OK
+  /api/health:
+    get:
+      operationId: get_api_health
+      summary: 'Estado agregado: consulta el GET /health de cada microservicio en paralelo'
+      description: 'Estado agregado: consulta el GET /health de cada microservicio en paralelo (tiempo máximo de
+        3 s) (RF15)'
+      x-roles:
+      - Todos
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    internalToken:
+      type: apiKey
+      in: header
+      name: X-Internal-Token
+  schemas:
+    Error:
+      type: object
+      properties:
+        codigo:
+          type: string
+          example: STOCK_INSUFICIENTE
+        mensaje:
+          type: string
+        detalles:
+          type: array
+          items:
+            type: object
+            properties:
+              campo:
+                type: string
+              error:
+                type: string
+        correlation_id:
+          type: string
+          format: uuid
+security:
+- bearerAuth: []

@@ -1,0 +1,529 @@
+openapi: 3.0.3
+info:
+  title: Compras y Proveedores - SportMarket S.A.S.
+  version: 1.0.0
+  description: 'Contrato API del microservicio Compras y Proveedores (framework Django; base de datos: compras_db).
+    Generado a partir de las tablas de contratos de la Entrega 2. Se accede únicamente a través del API Gateway.'
+servers:
+- url: http://localhost:8080
+  description: API Gateway (desarrollo)
+paths:
+  /api/proveedores:
+    get:
+      operationId: get_api_proveedores
+      summary: Consultar proveedores
+      description: 'Consultar proveedores (filtros: q, proveedor_activo, page, limit)'
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      - Responsable de compras
+      - Usuario de consulta
+      parameters:
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: proveedor_activo
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: post_api_proveedores
+      summary: Registrar proveedor
+      description: Registrar proveedor
+      x-roles:
+      - Administrador
+      - Responsable de compras
+      responses:
+        '201':
+          description: Creado
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/proveedores/{id}:
+    get:
+      operationId: get_api_proveedores_id
+      summary: Consultar proveedor
+      description: Consultar proveedor
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      - Responsable de compras
+      - Usuario de consulta
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      operationId: put_api_proveedores_id
+      summary: Actualizar proveedor
+      description: Actualizar proveedor
+      x-roles:
+      - Administrador
+      - Responsable de compras
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/proveedores/{id}/estado:
+    patch:
+      operationId: patch_api_proveedores_id_estado
+      summary: Activar o desactivar proveedor
+      description: Activar o desactivar proveedor (proveedor_activo)
+      x-roles:
+      - Administrador
+      - Responsable de compras
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/proveedores/{id}/productos:
+    post:
+      operationId: post_api_proveedores_id_productos
+      summary: Asociar un producto a un proveedor
+      description: Asociar un producto a un proveedor (producto_id, costo_referencia)
+      x-roles:
+      - Administrador
+      - Responsable de compras
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '201':
+          description: Creado
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Servicio necesario no disponible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      operationId: get_api_proveedores_id_productos
+      summary: Consultar los productos del proveedor
+      description: Consultar los productos del proveedor
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      - Responsable de compras
+      - Usuario de consulta
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/compras:
+    get:
+      operationId: get_api_compras
+      summary: Consultar órdenes
+      description: 'Consultar órdenes (filtros: estado, proveedor_id, desde, hasta, page, limit)'
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      - Responsable de compras
+      - Usuario de consulta
+      parameters:
+      - name: estado
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: proveedor_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: desde
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: hasta
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      operationId: post_api_compras
+      summary: Registrar orden de compra
+      description: Registrar orden de compra
+      x-roles:
+      - Administrador
+      - Responsable de compras
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                proveedor_id:
+                  type: integer
+                  description: Proveedor de la orden; debe existir y estar activo
+                bodega_destino_id:
+                  type: integer
+                  description: 'Bodega donde se recibirá la mercancía (no se valida aquí: la valida Inventario al
+                    recibir)'
+                detalles:
+                  type: array
+                  description: Una o más líneas de la orden
+                  items:
+                    type: object
+                    properties:
+                      producto_id:
+                        type: integer
+                        description: Producto solicitado; se valida en Catálogo
+                      cantidad_solicitada:
+                        type: integer
+                        description: Unidades solicitadas; mayor que cero
+                      costo_unitario:
+                        type: number
+                        description: Costo por unidad; no negativo
+                    required:
+                    - producto_id
+                    - cantidad_solicitada
+                    - costo_unitario
+              required:
+              - proveedor_id
+              - bodega_destino_id
+              - detalles
+      responses:
+        '201':
+          description: Creado
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Servicio necesario no disponible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/compras/{id}:
+    get:
+      operationId: get_api_compras_id
+      summary: Consultar una orden con su detalle
+      description: Consultar una orden con su detalle
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      - Responsable de compras
+      - Usuario de consulta
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/compras/{id}/estado:
+    patch:
+      operationId: patch_api_compras_id_estado
+      summary: Cancelar una orden
+      description: Cancelar una orden (solo estado CANCELADA)
+      x-roles:
+      - Administrador
+      - Responsable de compras
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/compras/{id}/recepciones:
+    post:
+      operationId: post_api_compras_id_recepciones
+      summary: Registrar recepción de mercancía
+      description: Registrar recepción de mercancía (RF06)
+      x-roles:
+      - Administrador
+      - Responsable de compras
+      - Operador de bodega
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                detalles:
+                  type: array
+                  description: Líneas recibidas
+                  items:
+                    type: object
+                    properties:
+                      orden_detalle_id:
+                        type: integer
+                        description: Línea de la orden que se recibe
+                      cantidad_recibida:
+                        type: integer
+                        description: Unidades recibidas; positivas y sin superar las pendientes de la línea
+                    required:
+                    - orden_detalle_id
+                    - cantidad_recibida
+              required:
+              - detalles
+      responses:
+        '201':
+          description: Creado
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      operationId: get_api_compras_id_recepciones
+      summary: Consultar las recepciones de una orden con el detalle de sus líneas
+      description: Consultar las recepciones de una orden con el detalle de sus líneas
+      x-roles:
+      - Administrador
+      - Responsable de compras
+      - Responsable de inventario
+      - Operador de bodega
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    internalToken:
+      type: apiKey
+      in: header
+      name: X-Internal-Token
+  schemas:
+    Error:
+      type: object
+      properties:
+        codigo:
+          type: string
+          example: STOCK_INSUFICIENTE
+        mensaje:
+          type: string
+        detalles:
+          type: array
+          items:
+            type: object
+            properties:
+              campo:
+                type: string
+              error:
+                type: string
+        correlation_id:
+          type: string
+          format: uuid
+security:
+- bearerAuth: []
