@@ -1,0 +1,619 @@
+openapi: 3.0.3
+info:
+  title: Inventario - SportMarket S.A.S.
+  version: 1.0.0
+  description: 'Contrato API del microservicio Inventario (framework Express; base de datos: inventario_db). Generado
+    a partir de las tablas de contratos de la Entrega 2. Se accede únicamente a través del API Gateway.'
+servers:
+- url: http://localhost:8080
+  description: API Gateway (desarrollo)
+paths:
+  /api/inventario/existencias:
+    get:
+      operationId: get_api_inventario_existencias
+      summary: Consultar existencias
+      description: 'Consultar existencias (filtros: producto_id, bodega_id, bajo_minimo, page, limit)'
+      x-roles:
+      - Todos
+      parameters:
+      - name: producto_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: bodega_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: bajo_minimo
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/inventario/existencias/{producto_id}:
+    get:
+      operationId: get_api_inventario_existencias_producto_id
+      summary: 'Consultar el stock de un producto: total y desglose por bodega'
+      description: 'Consultar el stock de un producto: total y desglose por bodega'
+      x-roles:
+      - Todos
+      parameters:
+      - name: producto_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/inventario/entradas:
+    post:
+      operationId: post_api_inventario_entradas
+      summary: Registrar entrada de inventario
+      description: Registrar entrada de inventario (tipo_movimiento ENTRADA)
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      - BOD y servicios internos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operacion_id:
+                  type: string
+                  maxLength: 36
+                  description: Identificador único de la operación (UUID)
+                producto_id:
+                  type: integer
+                  description: Producto asociado
+                bodega_destino_id:
+                  type: integer
+                  description: Bodega a la que ingresa la mercancía
+                bodega_origen_id:
+                  type: integer
+                  description: Bodega de la que sale la mercancía
+                cantidad_movimiento:
+                  type: integer
+                  description: Unidades; mayor que cero
+                motivo_movimiento:
+                  type: string
+                  maxLength: 200
+                  description: Justificación
+                origen_movimiento:
+                  type: string
+                  description: Identifica el origen del movimiento. Los usuarios externos deben enviar MANUAL. El
+                    valor COMPRA está reservado para el microservicio de Compras y DEVOLUCION para el microservicio
+                    de Devoluciones. Si un usuario externo intenta utilizar COMPRA o DEVOLUCION, el sistema responde
+                    403 (Forbidden).
+                documento_ref:
+                  type: string
+                  maxLength: 40
+                  description: Documento que originó el movimiento
+              required:
+              - operacion_id
+              - producto_id
+              - bodega_destino_id
+              - bodega_origen_id
+              - cantidad_movimiento
+              - origen_movimiento
+      responses:
+        '201':
+          description: Creado
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Sin permisos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Servicio necesario no disponible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/inventario/salidas:
+    post:
+      operationId: post_api_inventario_salidas
+      summary: Registrar salida de inventario
+      description: Registrar salida de inventario (tipo_movimiento SALIDA)
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      - BOD y servicios internos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operacion_id:
+                  type: string
+                  maxLength: 36
+                  description: Identificador único de la operación (UUID)
+                producto_id:
+                  type: integer
+                  description: Producto asociado
+                bodega_destino_id:
+                  type: integer
+                  description: Bodega a la que ingresa la mercancía
+                bodega_origen_id:
+                  type: integer
+                  description: Bodega de la que sale la mercancía
+                cantidad_movimiento:
+                  type: integer
+                  description: Unidades; mayor que cero
+                motivo_movimiento:
+                  type: string
+                  maxLength: 200
+                  description: Justificación
+                origen_movimiento:
+                  type: string
+                  description: Identifica el origen del movimiento. Los usuarios externos deben enviar MANUAL. El
+                    valor COMPRA está reservado para el microservicio de Compras y DEVOLUCION para el microservicio
+                    de Devoluciones. Si un usuario externo intenta utilizar COMPRA o DEVOLUCION, el sistema responde
+                    403 (Forbidden).
+                documento_ref:
+                  type: string
+                  maxLength: 40
+                  description: Documento que originó el movimiento
+              required:
+              - operacion_id
+              - producto_id
+              - bodega_destino_id
+              - bodega_origen_id
+              - cantidad_movimiento
+              - origen_movimiento
+      responses:
+        '201':
+          description: Creado
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Sin permisos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Servicio necesario no disponible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/inventario/ajustes:
+    post:
+      operationId: post_api_inventario_ajustes
+      summary: Registrar ajuste positivo o negativo
+      description: Registrar ajuste positivo o negativo (tipo_movimiento AJUSTE)
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operacion_id:
+                  type: string
+                  maxLength: 36
+                  description: Identificador único de la operación
+                producto_id:
+                  type: integer
+                  description: Producto ajustado
+                sentido_ajuste:
+                  type: string
+                  description: 'POSITIVO (suma existencias) o NEGATIVO (resta). Es un dato de la solicitud: el movimiento
+                    se guarda como AJUSTE'
+                bodega_destino_id:
+                  type: integer
+                  description: Bodega cuyas existencias aumentan
+                bodega_origen_id:
+                  type: integer
+                  description: Bodega cuyas existencias disminuyen
+                cantidad_movimiento:
+                  type: integer
+                  description: Unidades; mayor que cero
+                motivo_movimiento:
+                  type: string
+                  maxLength: 200
+                  description: Justificación del ajuste (auditoría)
+                documento_ref:
+                  type: string
+                  maxLength: 40
+                  description: Documento de referencia (por ejemplo, acta de conteo)
+              required:
+              - operacion_id
+              - producto_id
+              - sentido_ajuste
+              - bodega_destino_id
+              - bodega_origen_id
+              - cantidad_movimiento
+              - motivo_movimiento
+      responses:
+        '201':
+          description: Creado
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Sin permisos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Servicio necesario no disponible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/inventario/traslados:
+    post:
+      operationId: post_api_inventario_traslados
+      summary: Trasladar existencias entre bodegas
+      description: Trasladar existencias entre bodegas (tipo_movimiento TRASLADO)
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      - Operador de bodega
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operacion_id:
+                  type: string
+                  maxLength: 36
+                  description: Identificador único de la operación
+                producto_id:
+                  type: integer
+                  description: Producto a trasladar
+                bodega_origen_id:
+                  type: integer
+                  description: Bodega de salida
+                bodega_destino_id:
+                  type: integer
+                  description: Bodega de entrada; distinta de la de origen
+                cantidad_movimiento:
+                  type: integer
+                  description: Unidades; mayor que cero
+                motivo_movimiento:
+                  type: string
+                  maxLength: 200
+                  description: Justificación
+                documento_ref:
+                  type: string
+                  maxLength: 40
+                  description: Documento de referencia
+              required:
+              - operacion_id
+              - producto_id
+              - bodega_origen_id
+              - bodega_destino_id
+              - cantidad_movimiento
+      responses:
+        '201':
+          description: Creado
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Sin permisos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Servicio necesario no disponible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/inventario/movimientos:
+    get:
+      operationId: get_api_inventario_movimientos
+      summary: Consultar el kardex
+      description: 'Consultar el kardex (filtros: producto_id, bodega_id, tipo_movimiento, origen_movimiento, usuario_id,
+        desde, hasta, page, limit) (RF10)'
+      x-roles:
+      - Todos
+      parameters:
+      - name: producto_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: bodega_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: tipo_movimiento
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: origen_movimiento
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: usuario_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: desde
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: hasta
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/inventario/movimientos/{id}:
+    get:
+      operationId: get_api_inventario_movimientos_id
+      summary: Consultar un movimiento
+      description: Consultar un movimiento
+      x-roles:
+      - Todos
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/inventario/minimos/{producto_id}/{bodega_id}:
+    get:
+      operationId: get_api_inventario_minimos_producto_id_bodega_id
+      summary: Consultar el stock mínimo de un producto en una bodega
+      description: Consultar el stock mínimo de un producto en una bodega
+      x-roles:
+      - Todos
+      parameters:
+      - name: producto_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: bodega_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      operationId: put_api_inventario_minimos_producto_id_bodega_id
+      summary: Configurar el stock mínimo del producto en una bodega
+      description: Configurar el stock mínimo del producto en una bodega (RF09)
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      parameters:
+      - name: producto_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: bodega_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    internalToken:
+      type: apiKey
+      in: header
+      name: X-Internal-Token
+  schemas:
+    Error:
+      type: object
+      properties:
+        codigo:
+          type: string
+          example: STOCK_INSUFICIENTE
+        mensaje:
+          type: string
+        detalles:
+          type: array
+          items:
+            type: object
+            properties:
+              campo:
+                type: string
+              error:
+                type: string
+        correlation_id:
+          type: string
+          format: uuid
+security:
+- bearerAuth: []

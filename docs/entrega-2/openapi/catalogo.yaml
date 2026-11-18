@@ -1,0 +1,395 @@
+openapi: 3.0.3
+info:
+  title: Catálogo - SportMarket S.A.S.
+  version: 1.0.0
+  description: 'Contrato API del microservicio Catálogo (framework Express; base de datos: catalogo_db). Generado
+    a partir de las tablas de contratos de la Entrega 2. Se accede únicamente a través del API Gateway.'
+servers:
+- url: http://localhost:8080
+  description: API Gateway (desarrollo)
+paths:
+  /api/productos:
+    get:
+      operationId: get_api_productos
+      summary: Consultar y buscar productos
+      description: 'Consultar y buscar productos (filtros: nombre, codigo, categoria_id, proveedor_id, producto_activo,
+        page, limit)'
+      x-roles:
+      - Todos
+      parameters:
+      - name: nombre
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: codigo
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: categoria_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: proveedor_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: producto_activo
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      operationId: post_api_productos
+      summary: Registrar producto
+      description: Registrar producto
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codigo_producto:
+                  type: string
+                  maxLength: 40
+                  description: Código único del producto
+                nombre_producto:
+                  type: string
+                  maxLength: 120
+                  description: Nombre del producto
+                descripcion_producto:
+                  type: string
+                  description: Características del producto
+                categoria_id:
+                  type: integer
+                  description: Categoría o subcategoría asociada
+                unidad_medida:
+                  type: string
+                  maxLength: 20
+                  description: Unidad de comercialización
+                precio_venta:
+                  type: number
+                  description: Precio de venta (mayor o igual a cero)
+                proveedor_principal_id:
+                  type: integer
+                  description: Referencia informativa al proveedor principal (no se valida; Catálogo no llama a
+                    Compras)
+              required:
+              - codigo_producto
+              - nombre_producto
+              - categoria_id
+              - unidad_medida
+              - precio_venta
+      responses:
+        '201':
+          description: Creado
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/productos/{id}:
+    get:
+      operationId: get_api_productos_id
+      summary: Consultar un producto
+      description: Consultar un producto
+      x-roles:
+      - Todos
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      operationId: put_api_productos_id
+      summary: Actualizar producto
+      description: Actualizar producto
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/productos/{id}/estado:
+    patch:
+      operationId: patch_api_productos_id_estado
+      summary: Activar o desactivar producto
+      description: Activar o desactivar producto (producto_activo)
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/categorias:
+    get:
+      operationId: get_api_categorias
+      summary: Consultar categorías y subcategorías
+      description: 'Consultar categorías y subcategorías (filtros: categoria_padre_id, categoria_activa, page, limit)'
+      x-roles:
+      - Todos
+      parameters:
+      - name: categoria_padre_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: categoria_activa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: post_api_categorias
+      summary: Registrar categoría o subcategoría
+      description: Registrar categoría o subcategoría
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      responses:
+        '201':
+          description: Creado
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/categorias/{id}:
+    get:
+      operationId: get_api_categorias_id
+      summary: Consultar una categoría
+      description: Consultar una categoría
+      x-roles:
+      - Todos
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      operationId: put_api_categorias_id
+      summary: Actualizar categoría
+      description: Actualizar categoría
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/categorias/{id}/estado:
+    patch:
+      operationId: patch_api_categorias_id_estado
+      summary: Activar o desactivar categoría
+      description: Activar o desactivar categoría (categoria_activa)
+      x-roles:
+      - Administrador
+      - Responsable de inventario
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    internalToken:
+      type: apiKey
+      in: header
+      name: X-Internal-Token
+  schemas:
+    Error:
+      type: object
+      properties:
+        codigo:
+          type: string
+          example: STOCK_INSUFICIENTE
+        mensaje:
+          type: string
+        detalles:
+          type: array
+          items:
+            type: object
+            properties:
+              campo:
+                type: string
+              error:
+                type: string
+        correlation_id:
+          type: string
+          format: uuid
+security:
+- bearerAuth: []

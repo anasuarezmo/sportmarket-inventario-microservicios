@@ -1,0 +1,364 @@
+openapi: 3.0.3
+info:
+  title: Usuarios y Autenticación - SportMarket S.A.S.
+  version: 1.0.0
+  description: 'Contrato API del microservicio Usuarios y Autenticación (framework Flask; base de datos: usuarios_db).
+    Generado a partir de las tablas de contratos de la Entrega 2. Se accede únicamente a través del API Gateway.'
+servers:
+- url: http://localhost:8080
+  description: API Gateway (desarrollo)
+paths:
+  /api/auth/login:
+    post:
+      operationId: post_api_auth_login
+      summary: Iniciar sesión
+      description: Iniciar sesión (RF08)
+      x-roles:
+      - Pública
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: Correo electrónico del usuario
+                contrasena:
+                  type: string
+                  description: Contraseña ingresada
+              required:
+              - email
+              - contrasena
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Sin permisos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/auth/logout:
+    post:
+      operationId: post_api_auth_logout
+      summary: 'Cerrar sesión: el cliente descarta el token'
+      description: 'Cerrar sesión: el cliente descarta el token'
+      x-roles:
+      - Todos
+      responses:
+        '204':
+          description: Procesado sin contenido
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/auth/forgot-password:
+    post:
+      operationId: post_api_auth_forgot_password
+      summary: Solicitar recuperación de contraseña; responde igual exista o no el correo
+      description: Solicitar recuperación de contraseña; responde igual exista o no el correo
+      x-roles:
+      - Pública
+      security: []
+      responses:
+        '202':
+          description: Aceptado
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/auth/reset-password:
+    post:
+      operationId: post_api_auth_reset_password
+      summary: Restablecer la contraseña con un token de un solo uso
+      description: Restablecer la contraseña con un token de un solo uso
+      x-roles:
+      - Pública
+      security: []
+      responses:
+        '204':
+          description: Procesado sin contenido
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/auth/change-password:
+    post:
+      operationId: post_api_auth_change_password
+      summary: Cambiar la contraseña del usuario autenticado
+      description: Cambiar la contraseña del usuario autenticado
+      x-roles:
+      - Todos
+      responses:
+        '204':
+          description: Procesado sin contenido
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/usuarios:
+    get:
+      operationId: get_api_usuarios
+      summary: Consultar usuarios
+      description: 'Consultar usuarios (filtros: rol_id, usuario_activo, q, page, limit)'
+      x-roles:
+      - Administrador
+      parameters:
+      - name: rol_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: usuario_activo
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: post_api_usuarios
+      summary: Registrar usuario
+      description: Registrar usuario
+      x-roles:
+      - Administrador
+      responses:
+        '201':
+          description: Creado
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/usuarios/{id}:
+    get:
+      operationId: get_api_usuarios_id
+      summary: Consultar un usuario
+      description: Consultar un usuario
+      x-roles:
+      - Administrador
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      operationId: put_api_usuarios_id
+      summary: Actualizar nombre y correo
+      description: Actualizar nombre y correo
+      x-roles:
+      - Administrador
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicto con el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/usuarios/{id}/rol:
+    patch:
+      operationId: patch_api_usuarios_id_rol
+      summary: Asignar o modificar el rol
+      description: Asignar o modificar el rol (RF07)
+      x-roles:
+      - Administrador
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Datos que incumplen las reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/usuarios/{id}/estado:
+    patch:
+      operationId: patch_api_usuarios_id_estado
+      summary: Activar o desactivar usuario
+      description: Activar o desactivar usuario (usuario_activo)
+      x-roles:
+      - Administrador
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/roles:
+    get:
+      operationId: get_api_roles
+      summary: Consultar roles
+      description: Consultar roles
+      x-roles:
+      - Administrador
+      responses:
+        '200':
+          description: OK
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    internalToken:
+      type: apiKey
+      in: header
+      name: X-Internal-Token
+  schemas:
+    Error:
+      type: object
+      properties:
+        codigo:
+          type: string
+          example: STOCK_INSUFICIENTE
+        mensaje:
+          type: string
+        detalles:
+          type: array
+          items:
+            type: object
+            properties:
+              campo:
+                type: string
+              error:
+                type: string
+        correlation_id:
+          type: string
+          format: uuid
+security:
+- bearerAuth: []
