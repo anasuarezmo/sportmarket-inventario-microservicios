@@ -1,7 +1,16 @@
 # Catálogo
 
-Esta carpeta estará destinada al microservicio de catálogo del sistema de gestión de inventarios de SportMarket S.A.S.
+Microservicio de productos y categorías (RF01, RF02, RF12). Express + MySQL (`catalogo_db`). Puerto **3003**.
+Solo se accede a través del API Gateway: exige la cabecera `X-Internal-Token`.
 
-El microservicio de catálogo se encargará de gestionar la información relacionada con los productos del sistema.
+- Tablas: `categoria` (con `categoria_padre_id` para subcategorías) y `producto`. El esquema está en `sql/schema.sql` y se aplica solo al arrancar.
+- Contrato: `openapi.yaml` (documentación en `http://localhost:3003/docs`).
+- Capas: `manejador.js` (HTTP, credencial y rol) → `servicio.js` (reglas de negocio) → `repositorio.js` (SQL). Las pruebas usan un repositorio en memoria.
+- Respuestas: crear/actualizar `{mensaje, producto|categoria}`; consultar uno, el objeto; listas `{datos, pagina, limite, total}`; errores `{codigo, mensaje, detalles, correlation_id}`.
 
-Su implementación se realizará en las siguientes etapas del proyecto.
+```
+npm install
+npm test
+cp .env.example .env    # cambiar INTERNAL_TOKEN (el mismo del Gateway)
+npm start               # requiere MySQL con catalogo_db (docker compose up -d)
+```
