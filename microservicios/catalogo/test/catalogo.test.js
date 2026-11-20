@@ -134,7 +134,7 @@ test('paginacion y filtros invalidos -> 400', async () => {
   const ll = nuevo(); await conCategoria(ll);
   for (let i = 1; i <= 3; i++) await ll('POST', '/api/productos', { cuerpo: prod({ codigo_producto: `C${i}` }) });
   const r = await ll('GET', '/api/productos', { consulta: { page: '2', limit: '2' } });
-  assert.strictEqual(r.cuerpo.datos.length, 1); assert.strictEqual(r.cuerpo.total, 3); assert.strictEqual(r.cuerpo.pagina, 2);
+  assert.strictEqual(r.cuerpo.items.length, 1); assert.strictEqual(r.cuerpo.total, 3); assert.strictEqual(r.cuerpo.page, 2);
   for (const q of [{ page: '0' }, { limit: '101' }, { producto_activo: 'si' }, { categoria_id: 'x' }, { page: ['1', '2'] }]) {
     assert.strictEqual((await ll('GET', '/api/productos', { consulta: q })).status, 400, JSON.stringify(q));
   }

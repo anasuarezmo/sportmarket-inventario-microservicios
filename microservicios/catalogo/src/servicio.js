@@ -3,7 +3,7 @@ const { ErrorApi, noEncontrado } = require('./errores');
 const v = require('./validaciones');
 
 function crearServicio(repo) {
-  const pagina = (r, f) => ({ datos: r.filas, pagina: f.page, limite: f.limit, total: r.total });
+  const pagina = (r, f) => ({ items: r.filas, total: r.total, page: f.page, limit: f.limit });
 
   async function categoriaActivaOFalla(id, campo) {
     const c = await repo.categorias.obtener(id);
