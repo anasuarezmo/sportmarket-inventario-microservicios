@@ -1,0 +1,18 @@
+{
+  "name": "catalogo",
+  "version": "1.0.0",
+  "description": "Microservicio Catalogo de SportMarket: productos y categorias",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mysql2": "^3.11.0",
+    "swagger-ui-express": "^5.0.1",
+    "yaml": "^2.5.0"
+  }
+}
