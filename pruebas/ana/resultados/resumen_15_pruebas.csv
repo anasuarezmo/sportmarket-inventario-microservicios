@@ -1,0 +1,16 @@
+ejecucion,escenario_perfil,solicitudes,fallos,errores_pct,p95_ms,meta_errores_menor_1pct,meta_p95_menor_2000ms
+1,bodegas_lista_normal,57,0,0.00,84,SI,SI
+2,bodegas_detalle_normal,60,0,0.00,42,SI,SI
+3,usuarios_lista_normal,57,0,0.00,39,SI,SI
+4,devoluciones_lista_normal,60,0,0.00,65,SI,SI
+5,compras_lista_normal,60,0,0.00,38,SI,SI
+6,bodegas_lista_pico,152,0,0.00,170,SI,SI
+7,bodegas_detalle_pico,152,0,0.00,78,SI,SI
+8,usuarios_lista_pico,152,0,0.00,84,SI,SI
+9,devoluciones_lista_pico,152,0,0.00,72,SI,SI
+10,compras_lista_pico,160,0,0.00,68,SI,SI
+11,bodegas_lista_alta,285,0,0.00,140,SI,SI
+12,bodegas_detalle_alta,286,0,0.00,81,SI,SI
+13,usuarios_lista_alta,285,0,0.00,83,SI,SI
+14,devoluciones_lista_alta,289,0,0.00,84,SI,SI
+15,compras_lista_alta,299,0,0.00,55,SI,SI
