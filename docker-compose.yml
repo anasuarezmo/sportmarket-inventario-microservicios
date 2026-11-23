@@ -1,5 +1,4 @@
-# SportMarket: MySQL y los servicios de Edwin. Solo el Gateway publica puerto (8080).
-# Servicios de Ana (usuarios, bodegas real, compras, devoluciones): agregar bloques nuevos con el mismo patron.
+# SportMarket: MySQL y los 8 servicios. Solo el Gateway publica puerto (8080).
 # Variables secretas: archivo .env en la raiz (no se sube a GitHub). Ver .env.example.
 services:
   mysql:
@@ -20,18 +19,56 @@ services:
       retries: 12
       start_period: 20s
 
-  bodegas:
-    # Simulado mientras no exista el servicio real (puerto 5002, bodegas 1 a 3). Reemplazar por el de Ana.
-    image: node:lts-alpine
+  usuarios:
+    build:
+      context: .
+      dockerfile: docker/usuarios/Dockerfile
+    image: sportmarket-usuarios
     restart: unless-stopped
-    command: ["node", "/app/mock_bodegas.js"]
-    volumes:
-      - ./pruebas/edwin/mock_bodegas.js:/app/mock_bodegas.js:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PORT: "5001"
+      JWT_SECRET: ${JWT_SECRET:?falta JWT_SECRET en .env}
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:?falta INTERNAL_TOKEN en .env}
+      JWT_EXPIRES_MINUTES: "60"
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: usuarios_db
+      DB_USER: usuarios_user
+      DB_PASSWORD: dev_password
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:5002/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5001/health')"]
       interval: 10s
       timeout: 5s
-      retries: 6
+      retries: 12
+      start_period: 10s
+
+  bodegas:
+    build:
+      context: .
+      dockerfile: docker/bodegas/Dockerfile
+    image: sportmarket-bodegas
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PORT: "5002"
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:?falta INTERNAL_TOKEN en .env}
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: bodegas_db
+      DB_USER: bodegas_user
+      DB_PASSWORD: dev_password
+      URL_INVENTARIO: http://inventario:3004
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5002/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
   catalogo:
     build:
@@ -90,6 +127,65 @@ services:
       retries: 12
       start_period: 10s
 
+  compras:
+    build:
+      context: .
+      dockerfile: docker/compras/Dockerfile
+    image: sportmarket-compras
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      catalogo:
+        condition: service_healthy
+      inventario:
+        condition: service_healthy
+    environment:
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:?falta INTERNAL_TOKEN en .env}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?falta DJANGO_SECRET_KEY en .env}
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: compras_db
+      DB_USER: compras_user
+      DB_PASSWORD: dev_password
+      URL_INVENTARIO: http://inventario:3004
+      URL_CATALOGO: http://catalogo:3003
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8005/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  devoluciones:
+    build:
+      context: .
+      dockerfile: docker/devoluciones/Dockerfile
+    image: sportmarket-devoluciones
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      inventario:
+        condition: service_healthy
+    environment:
+      PORT: "5006"
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:?falta INTERNAL_TOKEN en .env}
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: devoluciones_db
+      DB_USER: devoluciones_user
+      DB_PASSWORD: dev_password
+      URL_INVENTARIO: http://inventario:3004
+      TIMEOUT_SEG: "3"
+      REINTENTOS: "3"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5006/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
   reportes:
     build:
       context: .
@@ -126,13 +222,19 @@ services:
     image: sportmarket-gateway
     restart: unless-stopped
     depends_on:
+      usuarios:
+        condition: service_healthy
+      bodegas:
+        condition: service_healthy
       catalogo:
         condition: service_healthy
       inventario:
         condition: service_healthy
-      reportes:
+      compras:
         condition: service_healthy
-      bodegas:
+      devoluciones:
+        condition: service_healthy
+      reportes:
         condition: service_healthy
     ports:
       - "8080:8080"
