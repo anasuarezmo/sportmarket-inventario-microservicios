@@ -82,3 +82,9 @@ El token no se guarda en ningún archivo. Dura 60 minutos.
 - `locustfile.py`: los 15 escenarios.
 - `resultados_locust/informe_real.html`: informe de Locust (gráficas y tablas).
 - `resultados_locust/real_*.csv`: estadísticas, historial, fallos y excepciones.
+
+## Gráficas del informe
+
+Captura del informe de Locust de la corrida del 23/11/2026 (estadísticas por prueba, percentiles de respuesta, fallos, solicitudes por segundo y usuarios). El informe interactivo completo es `resultados_locust/informe_real.html`; para verlo con sus gráficas hay que abrirlo en un navegador, porque GitHub muestra solo su código.
+
+![Informe de Locust: gráficas y estadísticas](resultados_locust/informe_real_graficas.png)
